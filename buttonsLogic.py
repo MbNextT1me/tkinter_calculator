@@ -6,25 +6,36 @@ import re
 class ButtonsLogic:
     def __init__(self, entry):
         self.entry = entry
-
-    def set_button_style(self, button):
-        style = ttk.Style()
-        style.configure("TButton", padding=(2, 2), relief="raised", borderwidth=2, font=('Arial', 14))
-        button.config(style="TButton")
+        self.entry_font_size = 24
+        self.button_font_size = 14
 
     def set_entry_style(self, entry):
         style = ttk.Style()
         style.configure("TEntry", padding=(5, 5))
         entry.config(style="TEntry")
+        entry.bind("<Configure>", lambda event, e=entry: self.adjust_entry_font_size(event, e))
+        entry['validatecommand'] = (entry.register(self.validate_entry), '%P')
+        entry['validate'] = 'key'
+
+    def validate_entry(self, new_text):
+        allowed_chars = set('0123456789+-*/.()%=')
+        if new_text == '' or new_text == '-' or new_text[0] == '.':
+            return True
+        return all(char in allowed_chars for char in new_text)
+
+    def set_button_style(self, button):
+        style = ttk.Style()
+        style.configure("TButton", padding=(2, 2), relief="raised", borderwidth=2, font=('Arial', self.button_font_size))
+        button.config(style="TButton")
 
     def create_button(self, parent, text, command=None, width=5):
         button = ttk.Button(parent, text=text, command=command, width=width)
         self.set_button_style(button)
+        button.bind("<Configure>", lambda event, b=button: self.adjust_button_font_size(event, b))
         return button
 
     def button_click(self, number):
         current = self.entry.get()
-
         if current == "0" and str(number).isdigit() and len(current) == 1:
             self.entry.delete(0, tk.END)
             self.entry.insert(tk.END, str(number))
@@ -33,6 +44,7 @@ class ButtonsLogic:
             self.entry.insert(tk.END, str(number))
         else:
             self.entry.insert(tk.END, str(number))
+        self.entry.focus_set()
 
     def button_equal(self):
         current = self.entry.get()
@@ -46,6 +58,7 @@ class ButtonsLogic:
         except:
             self.entry.delete(0, tk.END)
             self.entry.insert(tk.END, "Ошибка")
+        self.entry.focus_set() 
 
     def button_clear(self):
         self.entry.delete(0, tk.END)
@@ -175,3 +188,26 @@ class ButtonsLogic:
         except ValueError:
             self.entry.delete(0, tk.END)
             self.entry.insert(tk.END, "Ошибка: Неверный формат числа")
+
+    def adjust_entry_font_size(self, event, entry):
+        new_width = event.width
+        new_height = event.height
+        new_font_size = max(10, int(min(new_width / 15, new_height / 2)))
+        if new_font_size > 46:
+            new_font_size = 46
+        if new_font_size != self.entry_font_size:
+            self.entry_font_size = new_font_size
+            new_entry_font = ('Arial', self.entry_font_size)
+            self.entry.config(font=new_entry_font)
+
+    def adjust_button_font_size(self, event, button):
+        new_width = event.width
+        new_height = event.height
+        new_font_size = max(10, int(min(new_width / 15, new_height / 2)))
+        if new_font_size > 40:
+            new_font_size = 40
+        if new_font_size < 14:
+            new_font_size = 14
+        if new_font_size != self.button_font_size:
+            self.button_font_size = new_font_size
+            self.set_button_style(button)

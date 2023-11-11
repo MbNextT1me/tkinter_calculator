@@ -2,20 +2,35 @@ import tkinter as tk
 from tkinter import ttk
 from buttonsLogic import ButtonsLogic
 
+def on_key_press(event):
+    key = event.char
+    if key.isdigit() or key in ['+', '-', '*', '/', '.', '(', ')']:
+        buttons_logic.button_click(key)
+    elif key == '=':
+        buttons_logic.button_equal()
+    return 'break'
+
+
 if __name__ == "__main__":
     window = tk.Tk()
     window.title("Калькулятор")
 
-    entry_font = ('Arial', 18)
+    entry_font = ('Arial', 24)
+    button_font = ('Arial', 14)
 
     entry = ttk.Entry(window, width=20, font=entry_font, justify="right")
     buttons_logic = ButtonsLogic(entry)
     buttons_logic.set_entry_style(entry)
-    entry.grid(row=0, column=0, columnspan=4)
+    entry.grid(row=0, column=0, columnspan=4, sticky="nsew")
     entry.insert(tk.END, "0")
+
+    entry.focus_set()
+
+    entry.bind('<Key>', on_key_press)
 
     buttons = []
     button_labels = [7, 8, 9, 4, 5, 6, 1, 2, 3]
+
     button_grid_info =[(str(number), lambda number=number: buttons_logic.button_click(number), i // 3 + 3, i % 3) for i, number in enumerate(button_labels)]
 
     button_data = [
@@ -38,7 +53,14 @@ if __name__ == "__main__":
 
     for label, command, row, column in button_grid_info + button_data:
         button = buttons_logic.create_button(window, label, command)
-        button.grid(row=row, column=column)
+        button.grid(row=row, column=column, sticky="nsew")
         buttons.append(button)
-    
+
+    for i in range(7):
+        window.grid_rowconfigure(i, weight=1)
+
+    for i in range(4):
+        window.grid_columnconfigure(i, weight=1)
+
+    window.minsize(width=300, height=300)
     window.mainloop()
