@@ -19,6 +19,8 @@ if __name__ == "__main__":
     button_font = ('Arial', 14)
 
     entry = ttk.Entry(window, width=20, font=entry_font, justify="right")
+    entry.bind('<Key>', on_key_press)
+    entry.bind('<Return>', lambda event: buttons_logic.button_equal())
     buttons_logic = ButtonsLogic(entry)
     buttons_logic.set_entry_style(entry)
     entry.grid(row=0, column=0, columnspan=4, sticky="nsew")

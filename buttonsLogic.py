@@ -120,9 +120,17 @@ class ButtonsLogic:
                 self.entry.insert(tk.END, updated_input)
 
     def button_decimal(self):
-        current = self.entry.get()[:-1]
-        if not current or not current[-1].isdigit() and current[-1] != '.':
-            self.entry.insert(tk.END, '.')
+        current = self.entry.get()
+        if '.' not in current:
+            if current and (current[-1].isdigit() or current[-1] == ')'):
+                self.entry.insert(tk.END, '.')
+            elif len(current) == 1 and current[-1] in ['+', '-', '*', '/']:
+                self.entry.insert(tk.END, '0.')
+            elif len(current) == 1 and current[-1] == '-':
+                self.entry.insert(tk.END, '0.')
+            elif not current:
+                self.entry.insert(tk.END, '0.')
+
 
     def button_inverse(self):
         current = self.entry.get()
